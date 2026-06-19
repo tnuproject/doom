@@ -18,6 +18,7 @@
 #include <sys/ioctl.h>
 #include <sys/mman.h>
 #include <time.h>
+#include <errno.h>
 
 #if defined(__has_include)
 #if __has_include(<tnu/syscall.h>)
