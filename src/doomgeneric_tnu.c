@@ -18,7 +18,26 @@
 #include <sys/ioctl.h>
 #include <sys/mman.h>
 #include <time.h>
+
+#if defined(__has_include)
+#if __has_include(<tnu/syscall.h>)
 #include <tnu/syscall.h>
+#else
+#define DOOM_STANDALONE_TNU_COMPAT 1
+#endif
+#else
+#define DOOM_STANDALONE_TNU_COMPAT 1
+#endif
+
+#ifdef DOOM_STANDALONE_TNU_COMPAT
+#define TNU_IOCTL_FB_GETINFO 0x544e4601u
+struct syscall_fb_info {
+    uint32_t width;
+    uint32_t height;
+    uint32_t pitch;
+    uint8_t bpp;
+};
+#endif
 
 /* ------------------------------------------------------------------ */
 /* TNU framebuffer                                                      */
