@@ -1,30 +1,20 @@
 PACKAGE := doom
 THIS_MK := $(abspath $(lastword $(MAKEFILE_LIST)))
 REPO_DIR := $(patsubst %/,%,$(dir $(THIS_MK)))
-TNU_ROOT ?= $(abspath $(REPO_DIR)/..)
-ifeq ($(wildcard $(TNU_ROOT)/userspace/linker.ld),)
-TNU_ROOT ?= $(abspath $(REPO_DIR)/../tnu)
-endif
+STAGE_ROOT ?= $(abspath $(REPO_DIR))
 BUILD ?= build
 UPSTREAM := src/doomgeneric
 
 CC ?= gcc
-TNU_ROOT := $(abspath $(TNU_ROOT))
-ifeq ($(wildcard $(TNU_ROOT)/userspace/linker.ld),)
-$(error doom: TNU_ROOT='$(TNU_ROOT)' does not look like a TNU checkout)
-endif
-USER_CRT := $(TNU_ROOT)/$(BUILD)/obj/userspace/libc/src/crt0.o
-USER_LIB := $(TNU_ROOT)/$(BUILD)/user/libtnu.a
+USER_CRT :=
+USER_LIB :=
 
 CFLAGS := -std=gnu11 -O2 -g \
           -ffreestanding -fno-stack-protector -fno-builtin -fno-pic \
           -m64 -mno-red-zone \
-          -I$(TNU_ROOT)/userspace/libc/include \
-          -I$(TNU_ROOT)/kernel/include \
           -Isrc \
           -Isrc/doomgeneric/doomgeneric
-LDFLAGS := -T $(TNU_ROOT)/userspace/linker.ld -nostdlib -static -no-pie \
-           -Wl,-z,max-page-size=0x1000
+LDFLAGS :=
 
 DOOM_SRCS := $(filter-out \
     $(UPSTREAM)/doomgeneric_sdl.c \
@@ -63,9 +53,9 @@ $(UPSTREAM)/doomgeneric.h:
 		false; \
 	fi
 
-$(BUILD)/$(PACKAGE): $(DOOM_OBJS) $(TNU_OBJ) $(USER_LIB) $(USER_CRT)
+$(BUILD)/$(PACKAGE): $(DOOM_OBJS) $(TNU_OBJ)
 	@mkdir -p $(dir $@)
-	$(CC) $(CFLAGS) $(LDFLAGS) -o $@ $(USER_CRT) $(DOOM_OBJS) $(TNU_OBJ) $(USER_LIB) -lgcc
+	$(CC) $(CFLAGS) $(LDFLAGS) -o $@ $(DOOM_OBJS) $(TNU_OBJ)
 
 $(BUILD)/obj/%.o: $(UPSTREAM)/%.c src/config.h
 	@mkdir -p $(dir $@)
